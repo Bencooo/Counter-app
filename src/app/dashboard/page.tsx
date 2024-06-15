@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { abi } from '../abi' // Ajustez le chemin d'importation si nécessaire
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faMinus, faDoorOpen } from '@fortawesome/free-solid-svg-icons'
 
 const contractAddress = '0x44Ed5B6e2fcD22635B5feeF8fde5552B91c8fA30'
 
@@ -79,7 +79,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center py-2">
+    <div
+      className="min-h-screen bg-black flex flex-col items-center py-2" >
       <h1 className="text-3xl font-bold mt-6 mb-12 text-center text-white">Blockchain Counter</h1>
       <div className="flex justify-between w-full px-8">
         <div className="text-white">
@@ -92,14 +93,15 @@ export default function DashboardPage() {
         </div>
         {isConnected && (
           <button
-            className="mt-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
+            className="mt-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
             onClick={handleDisconnect}
           >
+            <FontAwesomeIcon icon={faDoorOpen} className="mr-2" />
             Disconnect
           </button>
         )}
       </div>
-      <div className="bg-[#4C4E4E] p-8 rounded-lg shadow-lg w-full max-w-md text-white mt-6">
+      <div className="bg-[#4C4E4E] p-8 rounded-lg shadow-lg w-full max-w-md text-white mt-16">
         <div className="flex justify-between items-center">
           <button
             className="p-4 bg-[#30C8DD] text-white font-semibold rounded-full transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
