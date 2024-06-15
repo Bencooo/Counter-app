@@ -3,7 +3,7 @@
 import { useAccount, useDisconnect, useReadContract, useWriteContract, useWatchContractEvent } from 'wagmi'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { abi } from '../abi' // Ajustez le chemin d'importation si nécessaire
+import { abi } from '../abi' 
 import Header from '../../components/Header'
 import Status from '../../components/Status'
 import CounterControl from '../../components/CounterControl'
@@ -75,7 +75,7 @@ export default function DashboardPage() {
 
   const handleDisconnect = () => {
     disconnect()
-    router.push('/') // Redirection vers la page d'accueil après la déconnexion
+    router.push('/')
   }
 
   return (
