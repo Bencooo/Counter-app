@@ -4,13 +4,13 @@ import { useAccount, useDisconnect, useReadContract, useWriteContract, useWatchC
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { abi } from '../abi' // Ajustez le chemin d'importation si nécessaire
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faMinus, faDoorOpen } from '@fortawesome/free-solid-svg-icons'
+import Header from '../../components/Header'
+import Status from '../../components/Status'
+import CounterControl from '../../components/CounterControl'
 
 const contractAddress = '0x44Ed5B6e2fcD22635B5feeF8fde5552B91c8fA30'
 
 export default function DashboardPage() {
-  const { address, isConnected, status: accountStatus } = useAccount()
   const { disconnect } = useDisconnect()
   const [counter, setCounter] = useState<number | null>(null)
   const { writeContract, isSuccess: writeSuccess } = useWriteContract()
@@ -79,64 +79,30 @@ export default function DashboardPage() {
   }
 
   return (
-    <div
-      className="min-h-screen bg-black flex flex-col items-center py-2" >
-      <h1 className="text-3xl font-bold mt-6 mb-12 text-center text-white">Blockchain Counter</h1>
-      <div className="flex justify-between w-full px-8">
-        <div className="text-white">
-          <p className="font-semibold text-lg">
-            Status: <span className={`font-bold ${isConnected ? 'text-green-500' : ''}`}>{accountStatus}</span>
-          </p>
-          <p className="font-semibold text-lg">
-            Address: <span className="font-bold">{address}</span>
-          </p>
-        </div>
-        {isConnected && (
-          <button
-            className="mt-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
-            onClick={handleDisconnect}
-          >
-            <FontAwesomeIcon icon={faDoorOpen} className="mr-2" />
-            Disconnect
-          </button>
-        )}
-      </div>
-      <div className="bg-[#4C4E4E] p-8 rounded-lg shadow-lg w-full max-w-md text-white mt-16">
-        <div className="flex justify-between items-center">
-          <button
-            className="p-4 bg-[#30C8DD] text-white font-semibold rounded-full transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-            onClick={() => {
-              lastOperation.current = 'increment'
-              writeContract({
-                address: contractAddress,
-                abi: abi,
-                functionName: 'increment',
-              })
-            }}
-          >
-            <FontAwesomeIcon icon={faPlus} className="text-white" />
-          </button>
-          {readLoading ? (
-            <p className="text-4xl">Loading...</p>
-          ) : (
-            <p className="text-4xl mx-4">{counter}</p>
-          )}
-          {readError && <p className="text-red-500">Error</p>}
-          <button
-            className="p-4 bg-[#30C8DD] text-white font-semibold rounded-full transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-            onClick={() => {
-              lastOperation.current = 'decrement'
-              writeContract({
-                address: contractAddress,
-                abi: abi,
-                functionName: 'decrement',
-              })
-            }}
-          >
-            <FontAwesomeIcon icon={faMinus} className="text-white" />
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-black flex flex-col items-center py-2">
+      <Header />
+      <Status onDisconnect={handleDisconnect} />
+      <CounterControl
+        counter={counter}
+        readLoading={readLoading}
+        readError={!!readError}
+        onIncrement={() => {
+          lastOperation.current = 'increment'
+          writeContract({
+            address: contractAddress,
+            abi: abi,
+            functionName: 'increment',
+          })
+        }}
+        onDecrement={() => {
+          lastOperation.current = 'decrement'
+          writeContract({
+            address: contractAddress,
+            abi: abi,
+            functionName: 'decrement',
+          })
+        }}
+      />
     </div>
   )
 }
