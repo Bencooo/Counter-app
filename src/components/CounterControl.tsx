@@ -11,7 +11,7 @@ interface CounterControlProps {
 }
 
 const CounterControl: React.FC<CounterControlProps> = ({ counter, readLoading, readError, onIncrement, onDecrement }) => (
-  <div className="bg-[#4C4E4E] p-8 rounded-lg shadow-lg w-full max-w-md text-white mt-16">
+  <div className="bg-[#4C4E4E] p-8 rounded-lg shadow-lg w-full max-w-md text-white mt-8 md:mt-16">
     <div className="flex justify-between items-center">
       <button
         className="p-4 bg-[#30C8DD] text-white font-semibold rounded-full transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
