@@ -3,12 +3,18 @@
 import { useAccount, useDisconnect, useReadContract, useWriteContract, useWatchContractEvent } from 'wagmi'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { abi } from '../abi' 
+import { abi } from '../ABI_COUNTER'
 import Header from '../../components/Header'
 import Status from '../../components/Status'
 import CounterControl from '../../components/CounterControl'
 
 const contractAddress = '0x44Ed5B6e2fcD22635B5feeF8fde5552B91c8fA30'
+
+interface Log {
+  data: string;
+  topics: string[];
+  address: string;
+}
 
 export default function DashboardPage() {
   const { disconnect } = useDisconnect()
@@ -29,9 +35,15 @@ export default function DashboardPage() {
     }
   }, [countData])
 
-  const forceUpdate = useCallback((operation: 'increment' | 'decrement') => {
+  const forceUpdate = useCallback((operation: 'increment' | 'decrement' | 'incrementBy' | 'decrementBy', value?: number) => {
     setCounter(prev => {
       if (prev === null) return prev
+      if (operation === 'incrementBy' && value !== undefined) {
+        return prev + value
+      }
+      if (operation === 'decrementBy' && value !== undefined) {
+        return Math.max(prev - value, 0)
+      }
       return operation === 'increment' ? prev + 1 : Math.max(prev - 1, 0)
     })
   }, [])
@@ -40,7 +52,7 @@ export default function DashboardPage() {
     address: contractAddress,
     abi: abi,
     eventName: 'Incremented',
-    onLogs: (logs) => {
+    onLogs: (logs: Log[]) => {
       console.log('New logs!', logs)
       if (logs && logs.length > 0) {
         console.log('Increment event detected:', logs)
@@ -54,10 +66,40 @@ export default function DashboardPage() {
     address: contractAddress,
     abi: abi,
     eventName: 'Decremented',
-    onLogs: (logs) => {
+    onLogs: (logs: Log[]) => {
       console.log('Decrement event detected:', logs)
       refetch()
       forceUpdate('decrement')
+    },
+  })
+
+  useWatchContractEvent({
+    address: contractAddress,
+    abi: abi,
+    eventName: 'IncrementedBy',
+    onLogs: (logs: Log[]) => {
+      console.log('Increment by value event detected:', logs)
+      if (logs && logs.length > 0) {
+        const log = logs[0]
+        const value = parseInt(log.data, 16)
+        refetch()
+        forceUpdate('incrementBy', value)
+      }
+    },
+  })
+
+  useWatchContractEvent({
+    address: contractAddress,
+    abi: abi,
+    eventName: 'DecrementedBy',
+    onLogs: (logs: Log[]) => {
+      console.log('Decrement by value event detected:', logs)
+      if (logs && logs.length > 0) {
+        const log = logs[0]
+        const value = parseInt(log.data, 16)
+        refetch()
+        forceUpdate('decrementBy', value)
+      }
     },
   })
 
@@ -68,6 +110,12 @@ export default function DashboardPage() {
         forceUpdate('increment')
       } else if (lastOperation.current === 'decrement') {
         forceUpdate('decrement')
+      } else if (lastOperation.current?.startsWith('incrementBy')) {
+        const value = parseInt(lastOperation.current.split(':')[1])
+        forceUpdate('incrementBy', value)
+      } else if (lastOperation.current?.startsWith('decrementBy')) {
+        const value = parseInt(lastOperation.current.split(':')[1])
+        forceUpdate('decrementBy', value)
       }
       lastOperation.current = null
     }
@@ -75,7 +123,7 @@ export default function DashboardPage() {
 
   const handleDisconnect = () => {
     disconnect()
-    router.push('/')
+    router.push('/') 
   }
 
   return (
@@ -100,6 +148,24 @@ export default function DashboardPage() {
             address: contractAddress,
             abi: abi,
             functionName: 'decrement',
+          })
+        }}
+        onIncrementBy={(value: number) => {
+          lastOperation.current = `incrementBy:${value}`
+          writeContract({
+            address: contractAddress,
+            abi: abi,
+            functionName: 'incrementBy',
+            args: [BigInt(value)], 
+          })
+        }}
+        onDecrementBy={(value: number) => {
+          lastOperation.current = `decrementBy:${value}`
+          writeContract({
+            address: contractAddress,
+            abi: abi,
+            functionName: 'decrementBy',
+            args: [BigInt(value)], 
           })
         }}
       />
